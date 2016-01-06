@@ -12,7 +12,7 @@ def respond(gmail, email, message)
     end
 end
 
-Gmail.connect(:xoauth2, Credentials.email, Credentials.oauth2_token) do |gmail|
+Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
     if !gmail.logged_in?
         puts 'Failure to login'
     else
