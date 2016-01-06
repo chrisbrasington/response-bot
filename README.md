@@ -1,6 +1,7 @@
 # ruby-gmail-auto-responder
 Ask gmail questions, get a response. Also invoke commands
 
+Sample secret.rb file:
 ```
 class Credentials
     def self.email
