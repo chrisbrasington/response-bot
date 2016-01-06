@@ -26,7 +26,8 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                         text = a.body
                         puts text
                         if text == "What's up?"
-                            respond(gmail, Listener.phone, 'Not much, yo!')
+                            message = 'Not much, yo! ' + Time.now.to_s
+                            respond(gmail, Listener.phone, message)
                             email.read!
                             #email.archive! is currently broken, labeling as SMS
                             email.move_to!("SMS");
