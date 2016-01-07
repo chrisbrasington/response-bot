@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 load 'secret.rb'
 require 'gmail'
 
@@ -11,6 +12,7 @@ def respond(gmail, email, message)
         body message
     end
 end
+
 
 Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
     if !gmail.logged_in?
@@ -33,12 +35,15 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                                 #email.archive! is currently broken, labeling as SMS
                                 email.move_to("SMS")
                             elsif text == 'weather'
-                                weather = %x[./weather.bat Denver]
+                                command = './weather.bat ' + default_city
+                                weather = %x[#{command}]
                                 respond(gmail, Listener.phone, weather)
                                 email.read
-                                #email.archive! is currently broken, labeling as SMS
                                 email.move_to("SMS")
                             elsif text.index('$') == 0
+                                # note transaction command is driven from another project
+                                # to log financial tranasctions to gnucash
+                                # https://github.com/chrisbrasington/text-messaging-to-gnucash
                                 command = 'transaction '
                                 command += "'" + text + "'"
                                 value = %x[#{command}]
