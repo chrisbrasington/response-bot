@@ -2,6 +2,8 @@
 load 'secret.rb'
 require 'gmail'
 
+default_city = 'Denver'
+
 def respond(gmail, email, message)
     puts 'Responding to ' + email
     puts message
