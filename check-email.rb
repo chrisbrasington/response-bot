@@ -13,7 +13,6 @@ def respond(gmail, email, message)
     end
 end
 
-
 Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
     if !gmail.logged_in?
         puts 'Failure to login'
@@ -27,32 +26,43 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                     email.message.attachments.each do |a|
                         if File.extname(a.filename) == '.txt'
                             text = a.body.to_s
-                            puts text
-                            if text == "What's up?"
-                                message = 'Feeling kinda bored ' #+ Time.now.to_s
-                                respond(gmail, Listener.phone, message)
-                                email.read
-                                #email.archive! is currently broken, labeling as SMS
-                                email.move_to("SMS")
-                            elsif text == 'weather'
-                                command = './weather.bat ' + default_city
-                                weather = %x[#{command}]
-                                respond(gmail, Listener.phone, weather)
-                                email.read
-                                email.move_to("SMS")
-                            elsif text.index('$') == 0
-                                # note transaction command is driven from another project
-                                # to log financial tranasctions to gnucash
-                                # https://github.com/chrisbrasington/text-messaging-to-gnucash
-                                command = 'transaction '
-                                command += "'" + text + "'"
-                                value = %x[#{command}]
-                                respond(gmail, Listener.phone, value)
-                                email.read
-                                email.move_to("SMS")
-                            else
-                                email.read
-                                email.move_to("Ignore")
+                            # avoid possible command line injection
+                            text = text.split('\'')[0]  
+                            if text.include? '\'' or text.include? ';' or text.include? '/'
+                                email.read!
+                                email.move_to("Ignore - Malicious")
+                            elsif
+                                if text == "What's up?"
+                                    message = 'Feeling pretty great.' 
+                                    respond(gmail, Listener.phone, message)
+                                    email.read!
+                                    #email.archive! is currently broken, labeling as SMS
+                                    email.move_to("SMS")
+                                elsif text.downcase == 'weather'
+                                    command = './weather.bat ' + default_city
+                                    weather = %x[#{command}]
+                                    respond(gmail, Listener.phone, weather)
+                                    email.read!
+                                    email.move_to("SMS")
+                                elsif text.index('$') == 0
+                                    # note transaction command is driven from another project
+                                    # to log financial tranasctions to gnucash
+                                    # https://github.com/chrisbrasington/text-messaging-to-gnucash
+                                    command = 'transaction '
+                                    command += "'" + text + "'"
+                                    value = %x[#{command}]
+                                    
+                                    puts command
+                                    puts
+                                    puts value
+                                    
+                                    respond(gmail, Listener.phone, value)
+                                    email.read!
+                                    email.move_to("SMS")
+                                else
+                                    email.read!
+                                    email.move_to("Ignore")
+                                end
                             end
                         end
                     end
