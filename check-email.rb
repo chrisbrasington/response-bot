@@ -23,7 +23,7 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
             emails.each do |email|
                 email.message.attachments.each do |a|
                     if File.extname(a.filename) == '.txt'
-                        text = a.body
+                        text = a.body.to_s
                         puts text
                         if text == "What's up?"
                             message = 'Feeling kinda bored ' #+ Time.now.to_s
@@ -36,6 +36,13 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                             respond(gmail, Listener.phone, weather)
                             email.read!
                             #email.archive! is currently broken, labeling as SMS
+                            email.move_to!("SMS");
+                        elsif text.index('$') == 0
+                            command = 'transaction '
+                            command += "'" + text + "'"
+                            value = %x[#{command}]
+                            respond(gmail, Listener.phone, value)
+                            email.read!
                             email.move_to!("SMS");
                         end
                     end
