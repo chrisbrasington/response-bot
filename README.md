@@ -3,7 +3,7 @@ Ask gmail questions, get a response. Also can system commands.
 
 #### Default responses:
 
-"What's up?" will respond with something.
+"status" will respond with something.
 
 "weather" will respond with response from weather.bat
 

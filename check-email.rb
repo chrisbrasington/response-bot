@@ -34,7 +34,7 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                                 email.read!
                                 email.move_to("Ignore - Malicious")
                             elsif
-                                if text == "What's up?"
+                                if text == "status"
                                     message = 'Feeling pretty great.' 
                                     respond(gmail, Listener.phone, message)
                                     email.read!
