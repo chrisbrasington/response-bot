@@ -1,2 +1,4 @@
 secret.rb
 oauth2.py
+settings.yml
+*.swp

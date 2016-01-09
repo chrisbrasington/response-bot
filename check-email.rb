@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
-load 'secret.rb'
 require 'gmail'
+require 'yaml'
 
-default_city = 'Denver'
+settings = YAML.load_file('settings.yml')
 
 def respond(gmail, email, message)
-    puts 'Responding to ' + email
+    puts 'Responding to ' + email + '\n'
     puts message
 
     gmail.deliver do
@@ -13,16 +13,19 @@ def respond(gmail, email, message)
         subject ""
         body message
     end
+	
+	puts 'Sent'
+
 end
 
-Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
+Gmail.connect!(settings['email'], settings['password']) do |gmail|
     if !gmail.logged_in?
         puts 'Failure to login'
     else
         while true
             if gmail.inbox.count > 0
-                emails = gmail.inbox.emails(:unread, :from => Listener.phone)
-                print emails.count, " emails from: ", Listener.phone
+                emails = gmail.inbox.emails(:unread, :from => settings['listener'])
+                print emails.count, " emails from: ", settings['listener']
                 puts
                 emails.each do |email|
                     email.message.attachments.each do |a|
@@ -36,14 +39,14 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                             elsif
                                 if text == "status"
                                     message = 'Feeling pretty great.' 
-                                    respond(gmail, Listener.phone, message)
+                                    respond(gmail, settings['listener'], message)
                                     email.read!
                                     #email.archive! is currently broken, labeling as SMS
                                     email.move_to("SMS")
                                 elsif text.downcase == 'weather'
-                                    command = './weather.bat ' + default_city
+                                    command = './weather.bat ' + settings['city']
                                     weather = %x[#{command}]
-                                    respond(gmail, Listener.phone, weather)
+                                    respond(gmail, settings['listener'], weather)
                                     email.read!
                                     email.move_to("SMS")
                                 elsif text.index('$') == 0
@@ -58,7 +61,7 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                                     puts
                                     puts value
                                     
-                                    respond(gmail, Listener.phone, value)
+                                    respond(gmail, settings['listener'], value)
                                     email.read!
                                     email.move_to("SMS")
                                 else
@@ -80,7 +83,7 @@ Gmail.connect!(Credentials.email, Credentials.password) do |gmail|
                     end
                 end
             else
-                print "0 emails from: ", Listener.phone
+                print "0 emails from: ", settings['listener'] 
                 puts
             end
             sleep 10
