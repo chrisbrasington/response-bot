@@ -18,5 +18,5 @@ Sample settings.yml file:
 city: WEATHER_CITY
 email: EMAIL_INBOX
 password: EMAIL_PASSWORD
-listener: EMAIL_SMS_TO_LISTEN_ANDRESPOND_TO
+listener: EMAIL_SMS_TO_LISTEN_AND_RESPOND_TO
 ```
