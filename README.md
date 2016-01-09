@@ -11,11 +11,9 @@ Ask gmail questions, get a response. Also can system commands.
 
 #### Security:
 
-An "ignore all but this email" gmail filter is a good idea, to reject all other emails from reaching the inbox (thus being ignored. It looks like from:(-{EMAIL_TO_LISTEN_TO})
+An "ignore all but this email" gmail filter is a good idea, to reject all other emails from reaching the inbox (thus being ignored, but not spoofing proof). It looks like from:(-{EMAIL_TO_LISTEN_TO})
 
-The settings.yml file, might want to hide that.
-
-Additionally, the settings.yml file sets the program to only checks a specified inbox and the Listener class only responds to a specified address. Both accounts should be fully under your control. System commands (no parameters) are not directly invoked from the message being sent, but instead are interpreted by the message body in check-email.rb. System commands with parameters are much riskier and checked to against potentially malicious characters, and the email is rejected if deemed malicious. It's not fool proof, but since you can specify what email to listen to and how to respond to that message, coder discretion be advised. Read me [here](https://www.owasp.org/index.php/Command_Injection)
+The settings.yml file, might want to hide that. Additionally, the settings.yml file sets the program to only checks a specified inbox and the listener only responds to a specified address. Both accounts should be fully under your control. System commands (no parameters) are not directly invoked from the message being sent, but instead are interpreted by the message body in check-email.rb. System commands with parameters are much riskier and checked to against potentially malicious characters, and the email is rejected if deemed malicious. It's not fool proof, but since you can specify what email to listen to and how to respond to that message, coder discretion be advised. Read me [here](https://www.owasp.org/index.php/Command_Injection)
 
 Sample settings.yml file:
 ```
