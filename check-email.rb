@@ -18,11 +18,32 @@ def respond(gmail, email, message)
 
 end
 
+# check every 10 seconds
+counterSleep = 10
+counterLoop = 0
+
+# logout/login to refresh session (and avoid timeout)
+# every 10 minutes (60 attempts)
+sessionRefresh = 60
+
+
 Gmail.connect!(settings['email'], settings['password']) do |gmail|
     if !gmail.logged_in?
         puts 'Failure to login'
     else
         while true
+            counterLoop += 1
+            if counterLoop >= sessionRefresh
+                counterLoop = 0 # reset counter
+                gmail.logout
+                gmail = Gmail.connect!(settings['email'], settings['password'])
+                if gmail.logged_in?
+                    puts 'Refresh: relogged in Session'
+                elsif
+                    puts 'Failure to login'
+                    break
+                end
+            end
             if gmail.inbox.count > 0
                 emails = gmail.inbox.emails(:unread, :from => settings['listener'])
                 print emails.count, " emails from: ", settings['listener']
@@ -86,7 +107,7 @@ Gmail.connect!(settings['email'], settings['password']) do |gmail|
                 print "0 emails from: ", settings['listener'] 
                 puts
             end
-            sleep 10
+            sleep counterSleep
         end
     end  
 end
