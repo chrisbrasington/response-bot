@@ -23,8 +23,8 @@ counterSleep = 10
 counterLoop = 0
 
 # logout/login to refresh session (and avoid timeout)
-# every 10 minutes (60 attempts)
-sessionRefresh = 60
+# every 1 minute (6 attempts)
+sessionRefresh = 6
 
 
 Gmail.connect!(settings['email'], settings['password']) do |gmail|
