@@ -1,4 +1,4 @@
-# ruby-gmail-auto-responder
+# response-bot (ruby gmail responder)
 Ask gmail questions, get a response. Also can system commands.
 
 #### Default responses:
