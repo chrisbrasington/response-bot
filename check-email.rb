@@ -38,21 +38,11 @@ def loop
             print '  Re-authenticate gmail session every ', sessionRefresh*counterSleep, ' seconds.'
             puts
             
-            while true
+            while counterLoop < sessionRefresh
                 print 'Checking inbox (', counterLoop+1, ')...'
                 puts
                 counterLoop += 1
-                if counterLoop >= sessionRefresh
-                    counterLoop = 0 # reset counter
-                    gmail.logout
-                    gmail = Gmail.connect!(settings['email'], settings['password'])
-                    if gmail.logged_in?
-                        puts 'Refresh: re-authentication gmail session.'
-                    elsif
-                        puts 'Failure to login.'
-                        break
-                    end
-                end
+                
                 gmail.inbox.find(:unread, :from => settings['listener']).each do |email|
                     print 'Found email from ',settings['listener_name']
                     puts
@@ -110,6 +100,10 @@ def loop
                 end
                 sleep counterSleep
             end
+            
+            counterLoop = 0 # reset counter
+            puts 'Logging out.'
+            gmail.logout
         end  
     end
 end
@@ -119,14 +113,10 @@ while true
         puts 'Beginning gmail listener.'
         loop
     rescue => exception
-        puts 'In rescue'
+        puts 'In rescue - sleeping for half a minute.'
         puts exception
+        sleep 30
     ensure
-        begin
-            puts 'Hit Ensure (due to failure) - sleeping for half a minute.'
-            sleep 30
-        ensure
-            break #allow 2 force breaks (CTRL+C) to stop the program
-        end
+        puts 'Restarting..'
     end   
 end
