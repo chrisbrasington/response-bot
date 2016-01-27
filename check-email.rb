@@ -69,6 +69,13 @@ def loop
                                     respond(gmail, settings['listener'], weather, 'Weather')
                                     email.read!
                                     email.move_to("SMS")
+                                elsif text.downcase == 'snow' or text.downcase == 'keystone'
+                                    puts 'Running Keystone snow report..'
+                                    command = './keystone.bat'
+                                    snow = %x[#{command}]
+                                    respond(gmail, settings['listener'], snow, 'KeyStone Snow Report')
+                                    email.read!
+                                    email.move_to("SMS")
                                 elsif text.index('$') == 0
                                     puts 'Running transaction script..'
                                     # note transaction command is driven from another project
