@@ -19,8 +19,10 @@ end
 def run
     # check once, run again on cronjob
     
+    fullPath = "./"
+    
     # settings file
-    settings = YAML.load_file('settings.yml')
+    settings = YAML.load_file(fullPath+'settings.yml')
 
     Gmail.connect!(settings['email'], settings['password']) do |gmail|
         if !gmail.logged_in?
@@ -54,14 +56,14 @@ def run
                                 email.move_to("SMS")
                             elsif text.downcase == 'weather'
                                 puts 'Running weather script..'
-                                command = './weather.bat ' + settings['city']
+                                command = fullPath+'weather.bat ' + settings['city']
                                 weather = %x[#{command}]
                                 respond(gmail, settings['listener'], weather, 'Weather')
                                 email.read!
                                 email.move_to("SMS")
                             elsif text.downcase == 'snow' or text.downcase == 'keystone'
                                 puts 'Running Keystone snow report..'
-                                command = './keystone.bat'
+                                command = fullPath+'keystone.bat'
                                 snow = %x[#{command}]
                                 respond(gmail, settings['listener'], snow, 'KeyStone Snow Report')
                                 email.read!
