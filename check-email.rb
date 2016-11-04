@@ -47,7 +47,7 @@ def run
 				
 				if email.subject == 'transit'
 					puts 'Transit request found.'
-                    text = email.message.body.match(/<div dir="ltr">(.*)<\/div>/m)[1]
+                    text = email.message.body.to_s.strip
                     
                     if text.start_with?('transit')
                         email.read!
