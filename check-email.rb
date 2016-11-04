@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 require 'gmail'
 require 'yaml'
+require 'awesome_print'
+
 
 def respond(gmail, email, message, subject_title)
     puts '----------------------------------'
@@ -11,6 +13,10 @@ def respond(gmail, email, message, subject_title)
         to email
         subject subject_title
         body message
+        html_part do
+            content_type 'text/html; charset=UTF-8'
+            body "<p>#{message}</p>"
+        end
     end
 	puts 'Sent'
     puts '----------------------------------'
@@ -19,7 +25,7 @@ end
 def run
     # check once, run again on cronjob
     
-    fullPath = "./"
+    fullPath = "/home/christopher/repo/response-bot/"
     
     # settings file
     settings = YAML.load_file(fullPath+'settings.yml')
@@ -38,64 +44,25 @@ def run
                 foundMessage = true
                 print 'Found email from ',settings['listener_name']
                 puts
-                email.message.attachments.each do |a|                        
-                    if File.extname(a.filename) == '.txt'
-                        text = a.body.to_s
-                        # avoid possible command line injection
-                        text = text.split('\'')[0]  
-                        if text.include? '\'' or text.include? ';' or text.include? '/'
-                            email.read!
-                            email.move_to("Ignore - Malicious")
-                        elsif
-                            if text == "status"
-                                puts 'Asked for status.'
-                                message = 'Feeling pretty great.' 
-                                respond(gmail, settings['listener'], message, 'Status Report')
-                                email.read!
-                                #email.archive! is currently broken, labeling as SMS
-                                email.move_to("SMS")
-                            elsif text.downcase == 'weather'
-                                puts 'Running weather script..'
-                                command = fullPath+'weather.bat ' + settings['city']
-                                weather = %x[#{command}]
-                                respond(gmail, settings['listener'], weather, 'Weather')
-                                email.read!
-                                email.move_to("SMS")
-                            elsif text.downcase == 'snow' or text.downcase == 'keystone'
-                                puts 'Running Keystone snow report..'
-                                command = fullPath+'keystone.bat'
-                                snow = %x[#{command}]
-                                respond(gmail, settings['listener'], snow, 'KeyStone Snow Report')
-                                email.read!
-                                email.move_to("SMS")
-                            elsif text.index('$') == 0
-                                puts 'Running transaction script..'
-                                # note transaction command is driven from another project
-                                # to log financial tranasctions to gnucash
-                                # https://github.com/chrisbrasington/text-messaging-to-gnucash
-                                command = 'transaction '
-                                command += "'" + text + "'"
-                                value = %x[#{command}]
-                                
-                                puts command
-                                puts
-                                puts value
-                                
-                                respond(gmail, settings['listener'], value, 'Transaction')
-                                email.read!
-                                email.move_to("SMS")
-                            else
-                                email.read!
-                                email.move_to("Ignore")
-                            end
-                        end
-                    end
-                end
-                               
-                gmail.inbox.find(:unread).each do |email|
-                    email.read!
-                    email.move_to("Ignore")
-                end
+				
+				if email.subject == 'transit'
+					puts 'Transit request found.'
+                    text = email.message.body.match(/<div dir="ltr">(.*)<\/div>/m)[1]
+                    
+                    if text.start_with?('transit')
+                        email.read!
+                        
+                        command = text
+                        puts "Gathering response for (#{command})"
+                        
+                        value = %x[#{command}]
+
+                        value = command + '<br><br>' + value
+
+                        respond(gmail, settings['listener'], value, 'Transit')
+                        email.move_to("SMS")
+                    end                  
+				end			
             end
             
             if not foundMessage
